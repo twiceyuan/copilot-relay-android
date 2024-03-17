@@ -13,5 +13,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "copilot-gpt-service-android"
 include(":app")
