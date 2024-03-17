@@ -110,15 +110,14 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.chatCompletion() {
         header("Connection", "keep-alive")
     }
 
-    val response = statement.execute()
-
-    if (isStream) {
-        handleAsStream(response)
-    } else {
-        handleAsText(response)
+    statement.execute { response ->
+        if (isStream) {
+            handleAsStream(response)
+        } else {
+            handleAsText(response)
+        }
     }
 }
-
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.handleAsText(
     response: HttpResponse,
