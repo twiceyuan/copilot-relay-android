@@ -1,5 +1,7 @@
 # Copilot Relay Android
 
+[English](README.md) | [中文](README_zh.md)
+
 将 OpenAI 格式请求转换为 GitHub Copilot API。
 
 目前支持的 API：

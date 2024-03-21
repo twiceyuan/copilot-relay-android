@@ -71,11 +71,11 @@ class MainActivity : AppCompatActivity() {
             binding.etServerPort.isEnabled = isRunning.not()
             binding.btnUpdate.isEnabled = isRunning.not()
             binding.btnTest.isEnabled = isRunning
-            binding.tvServerStatus.text = if (status is ServerStatus.Running) {
-                getString(R.string.server_is_running_status, status.port.toString())
-            } else {
-                getString(R.string.server_is_not_running)
-            }
+            updateServerStatus(status, RelayService.processedRequestsCount.value)
+        }
+
+        RelayService.processedRequestsCount.observe(this) {
+            updateServerStatus(RelayService.isServerRunning.value, it)
         }
 
         binding.swServerStatus.setOnCheckedChangeListener { _, isChecked ->
@@ -99,6 +99,17 @@ class MainActivity : AppCompatActivity() {
                 val message = if (result) "Test success" else "Test failed"
                 Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun updateServerStatus(serverStatus: ServerStatus?, handleCount: Int?) {
+        val status = serverStatus ?: ServerStatus.Stopped
+        val count = handleCount ?: 0
+
+        binding.tvServerStatus.text = if (status is ServerStatus.Running) {
+            getString(R.string.server_is_running_status, status.port.toString(), count.toString())
+        } else {
+            getString(R.string.server_is_not_running)
         }
     }
 

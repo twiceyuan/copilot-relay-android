@@ -22,6 +22,7 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.plugins.defaultheaders.DefaultHeaders
+import io.ktor.server.request.httpMethod
 import io.ktor.server.request.receiveText
 import io.ktor.server.request.uri
 import io.ktor.server.response.cacheControl
@@ -36,6 +37,7 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readUTF8Line
 import io.ktor.utils.io.writeStringUtf8
 import me.yuanis.copilot.gpt.service.App.Companion.TAG
+import me.yuanis.copilot.gpt.service.RelayService
 import me.yuanis.copilot.gpt.service.client.entity.InternalToken
 import me.yuanis.copilot.gpt.service.data.RelayRepo
 import me.yuanis.copilot.gpt.service.utils.json
@@ -44,12 +46,19 @@ import java.util.UUID
 
 private val client = HttpClient(Android)
 
+interface EventListener {
+
+    fun onRequest(method: String, path: String) {}
+}
+
+object EmptyEventListener: EventListener
+
 /**
  * Start server.
  *
  * @return ApplicationEngine
  */
-fun startServer(): ApplicationEngine {
+fun startServer(eventListener: EventListener = EmptyEventListener): ApplicationEngine {
     return embeddedServer(CIO, port = 8080) {
         install(DefaultHeaders) {
             header("Access-Control-Allow-Origin", "*")
@@ -67,6 +76,7 @@ fun startServer(): ApplicationEngine {
                 Log.d(TAG, "Request -> [POST] ${call.request.uri}")
                 chatCompletion()
                 Log.d(TAG, "Request <- [POST] ${call.request.uri}")
+                eventListener.onRequest(call.request.httpMethod.value, call.request.uri)
             }
         }
     }.start()
